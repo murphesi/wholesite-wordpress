@@ -1,26 +1,26 @@
 # WholeSite - Wordpress Plugin
 
-Contributors: Chris Murphy
-Tested up to: 3.9.2
-Stable tag: 0.0.1
-License: GPLv3
-License URI: http://www.gnu.org/licenses
+ Contributors: Chris Murphy
+ Tested up to: 3.9.2
+ Stable tag: 0.0.1
+ License: GPLv3
+ License URI: http://www.gnu.org/licenses
 
 ## Description
 
-Wordpress plugin to connect your WholeSite account.
+ Wordpress plugin to connect your WholeSite account.
 
 ## Installation
 
-Install in plugins folder and activate via control panel.
+ Install in plugins folder and activate via control panel.
 
 ## Example
 
-<code>
-//~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
+<pre>
+ //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
 
-// Build transaction data
-$transactionData = array(
+ // Build transaction data
+ $transactionData = array(
 		//~~~~~TEST MODE~~~~~~~~~~~~~
 		'test'				=> true,
 		//~~~~~TEST MODE~~~~~~~~~~~~~
@@ -67,21 +67,21 @@ $transactionData = array(
 								)
 	);
 	
-// Process transaction
-$response = $wholesite->processTransaction( $transactionData );
+ // Process transaction
+ $response = $wholesite->processTransaction( $transactionData );
 
-// Check for errors
-if( is_wp_error( $response ) ) {
+ // Check for errors
+ if( is_wp_error( $response ) ) {
 	echo $response->get_error_message();
-}
-else {	
+ }
+ else {	
 	print_r( $response );
 	
 	// show your messaging based on response
-}
+ }
 
-//~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
-</code>
+ //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
+</pre>
 
 ## Changelog
 
