@@ -72,11 +72,11 @@ class WholeSite {
 	 * Admin menu hook
 	 */
 	function admin_menu() {
-		// add settings page
-		add_options_page( 'WholeSite', 'WholeSite', 'manage_options', 'wholesite-settings', array( $this, 'render_settings_page' ) );
-		
 		// add admin nav page
 		add_menu_page( 'WholeSite Dashboard', 'WholeSite', 'activate_plugins', 'wholesite', array( $this, 'render_admin_page' ), 'dashicons-analytics', 30 );
+		
+		// add settings page
+		add_submenu_page( 'wholesite', 'WholeSite Settings', 'Settings', 'activate_plugins', 'wholesite-settings', array( $this, 'render_settings_page' ) );  
 	}
 	
 	/**
@@ -97,8 +97,7 @@ class WholeSite {
 	 * Register settings, sections & fields
 	 */
 	function register_settings() {
-		register_setting( 'wholesite_option_group', 'wholesite_settings', array( $this, 'sanitize_settings' ) );
-	
+		register_setting( 'wholesite_settings', 'wholesite_settings', array( $this, 'sanitize_settings' ) );
 	
 		add_settings_section( 'wholesite_main', 'Site Settings', array( $this, 'settings_help_site' ), 'wholesite-settings' );
 		
@@ -118,9 +117,9 @@ class WholeSite {
 				settings_fields( 'wholesite_settings' );
 				
 				do_settings_sections( 'wholesite-settings' );
+				
+				submit_button(); 
 				?>
-				<br/>
-				<input class="button button-primary" type="submit" name="submit" value="Save Changes" />
 			</form>
 		</div>
 		<?
@@ -156,7 +155,7 @@ class WholeSite {
 	 */
 	function sanitize_settings( $input ) {
 		$valid = array();
-	
+
 		// Site settings		
 		if ( isset( $input['site_id'] ) ) {
 			$valid['site_id'] = sanitize_text_field( $input['site_id'] );
