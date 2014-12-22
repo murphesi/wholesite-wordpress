@@ -48,25 +48,34 @@ class Request {
 		$url = rtrim($this->url, '/') . '/';
 		
 		// send request
-		$response = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data ));
+		$request = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data ));
 		
-		// return response
-		if ( $response['response']['code'] == '200' ) {
-			$data = json_decode( $response['body'] );
-			
-			// build response object
-			$response = new \WholeSite\Response();
-			$response->requestTime = $data->requestTime;
-			$response->success = $data->success ? 1 : 0;
-			$response->message = isset($data->message) ? $data->message : '';
-			$response->code = isset($data->code) ? $data->code : '';
-			$response->data = isset($data->data) ? $data->data : '';
-			
-			return $response;
+		// build response object
+		$response = new \WholeSite\Response();
+		
+		// check for request posting errors
+		if( is_wp_error( $response ) ) {
+			$response->success = 0;
+			$response->message = $response->get_error_message();
+			$response->code = 'REQUESTERR';
+			$response->data = '';
 		}
-		else {
-			return new \WP_Error( 'error', __( $url . ' - ' . $response['response']['message'] ) );
+		else {	
+			if ( $request['response']['code'] == '200' ) {
+				$data = json_decode( $request['body'] );
+				
+				$response->requestTime = $data->requestTime;
+				$response->success = $data->success ? 1 : 0;
+				$response->message = isset($data->message) ? $data->message : '';
+				$response->code = isset($data->code) ? $data->code : '';
+				$response->data = isset($data->data) ? $data->data : '';
+			}
+			else {
+				return new \WP_Error( 'error', __( $url . ' - ' . $request['response']['message'] ) );
+			}
 		}
+		
+		return $response;
 	}
 			
 }

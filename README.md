@@ -2,7 +2,7 @@
 
  Contributors: Chris Murphy
  Tested up to: 3.9.2
- Stable tag: 0.0.2
+ Stable tag: 0.0.3
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
@@ -84,6 +84,9 @@
 </pre>
 
 ## Changelog
+
+== 0.0.3 ==
+* Check for WP error on post data response.
 
 == 0.0.2 ==
 * Move settings into submenu under WholeSite Menu
