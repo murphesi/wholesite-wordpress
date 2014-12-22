@@ -1,7 +1,7 @@
 # WholeSite - Wordpress Plugin
 
  Contributors: Chris Murphy
- Tested up to: 3.9.2
+ Tested up to: 4.1
  Stable tag: 0.0.3
  License: GPLv3
  License URI: http://www.gnu.org/licenses
