@@ -2,7 +2,7 @@
 
  Contributors: Chris Murphy
  Tested up to: 4.1
- Stable tag: 0.0.3
+ Stable tag: 0.0.4
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
@@ -84,6 +84,9 @@
 </pre>
 
 ## Changelog
+
+== 0.0.4 ==
+* Add support for CVV value.
 
 == 0.0.3 ==
 * Check for WP error on post data response.
