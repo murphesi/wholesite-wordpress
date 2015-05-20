@@ -40,6 +40,12 @@ class Transaction {
 	public $pan;
 	
 	/**
+	 * Credit Card Validation Number (3-4 digits)
+	 * [optional]
+	 */
+	public $cvv = null;
+	
+	/**
 	 * Credit Card Expiry Month (2 Digits)
 	 * e.g. 09
 	 */
@@ -200,6 +206,7 @@ class Transaction {
 		if( isset($params['cardType']) ) $this->cardType = sanitize_text_field( $params['cardType'] );
 		if( isset($params['cardholder']) ) $this->cardholder = sanitize_text_field( $params['cardholder'] );
 		if( isset($params['pan']) ) $this->pan = sanitize_text_field( $params['pan'] );
+		if( isset($params['cvv']) ) $this->cvv = sanitize_text_field( $params['cvv'] );
 		if( isset($params['expiryMonth']) ) $this->expiryMonth = sanitize_text_field( $params['expiryMonth'] );
 		if( isset($params['expiryYear']) ) $this->expiryYear = sanitize_text_field( $params['expiryYear'] );
 		if( isset($params['amount']) ) $this->amount = number_format($params['amount'], 2, '.', '');
@@ -248,6 +255,7 @@ class Transaction {
 				'cardType' => $this->cardType,
 				'cardholder' => $this->cardholder,
 				'pan' => $this->pan,
+				'cvv' => $this->cvv,
 				'expiryMonth' => $this->expiryMonth,
 				'expiryYear' => $this->expiryYear,
 				'amount' => $this->amount,
