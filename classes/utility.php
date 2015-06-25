@@ -9,8 +9,8 @@ class Utility {
 	 * @param string $name
 	 * @return mixed (null if not set)
 	 */
-	public static function getSetting( $name ) {
-		$options = get_option( 'wholesite_settings' );
+	public static function getSetting( $name, $option_name = 'wholesite_settings' ) {
+		$options = get_option( $option_name );
 		
 		if( $options !== FALSE && isset( $options[$name] ) )
 			return $options[$name];
