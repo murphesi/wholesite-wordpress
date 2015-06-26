@@ -353,7 +353,7 @@ class WholeSite {
 	 */
 	private function sendConfirmationEmail( $key, $params = array() ) {
 		if ( !isset( $params['billEmail'] ) ) {
-			//return false;
+			return false;
 		}
 
 		$templateConfig = \WholeSite\Utility::getSetting( 'templates', 'wholesite_templates' );
