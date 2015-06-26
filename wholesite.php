@@ -369,12 +369,12 @@ class WholeSite {
 
 					// substitute placeholders with params
 					$confirmationTemplate = preg_replace_callback( '/({{\$(?P<key>.*?)}})/im', function($m) use ($params) {
-						$replaceKey = strtolower( $m['key'] );
+						$replaceKey = strtolower( trim( $m['key'] ) );
 
 						$replacement = '~NOT FOUND: ' . $replaceKey . '~';
 
-						if ( isset( $params['replaceKey'] ) ) {
-							$replacement = trim( $params['replaceKey'] );
+						if ( isset( $params[$replaceKey] ) ) {
+							$replacement = trim( $params[$replaceKey] );
 						}
 
 						return $replacement;
