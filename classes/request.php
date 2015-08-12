@@ -49,14 +49,14 @@ class Request {
 		
 		// send request
 		$request = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data ));
-		
+		print_r($request);
 		// build response object
 		$response = new \WholeSite\Response();
 		
 		// check for request posting errors
-		if( is_wp_error( $response ) ) {
+		if( is_wp_error( $request ) ) {
 			$response->success = 0;
-			$response->message = $response->get_error_message();
+			$response->message = $request->get_error_message();
 			$response->code = 'REQUESTERR';
 			$response->data = '';
 		}
