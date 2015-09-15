@@ -49,7 +49,7 @@ class Request {
 		
 		// send request
 		$request = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data ));
-		print_r($request);
+		
 		// build response object
 		$response = new \WholeSite\Response();
 		
