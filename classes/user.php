@@ -14,16 +14,28 @@ class User {
 	private $SERVICE_PATH = '/user';
 	
 	/**
-	 * WholeSite Cart ID
+	 * First name
 	 */
 	public $firstName;
 
+	/**
+	 * Last name
+	 */
 	public $lastName;
 
+	/**
+	 * Email address
+	 */
 	public $email;
 
-	public $customData;
+	/**
+	 * A string or array of custom meta data for this user
+	 */
+	public $metaData;
 
+	/**
+	 * A secondary prefix to add to the username
+	 */
 	public $secondaryPrefix = null;
 	
 	
@@ -57,7 +69,7 @@ class User {
 
 		if( isset($params['email']) ) $this->email = sanitize_email( $params['email'] );
 
-		$this->customData = array_map( 'esc_attr', $filtered_params );
+		$this->metaData = array_map( 'esc_attr', $filtered_params );
 	}
 	
 	/**
@@ -79,7 +91,7 @@ class User {
 		$prefix = \WholeSite\Utility::getSetting( 'user_prefix', 'wholesite_registrations' );
 
 		// Encode user data
-		$metaData = base64_encode( serialize( $this->customData ) );
+		$metaData = base64_encode( serialize( $this->metaData ) );
 
 		// Build request data
 		$data = array(
