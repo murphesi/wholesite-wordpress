@@ -52,7 +52,7 @@ class Request {
 		
 		// build response object
 		$response = new \WholeSite\Response();
-		
+
 		// check for request posting errors
 		if( is_wp_error( $request ) ) {
 			$response->success = 0;

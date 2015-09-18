@@ -1,20 +1,37 @@
 # WholeSite - Wordpress Plugin
 
  Contributors: Chris Murphy
- Tested up to: 4.1
- Stable tag: 0.0.5
+ Tested up to: 4.2.x
+ Stable tag: 0.0.6
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
 ## Description
 
- Wordpress plugin to connect your WholeSite account.
+ Wordpress plugin to connect your WholeSite account for:
+ 	- Transaction processing
+ 	- User registration
 
 ## Installation
 
  Install in plugins folder and activate via control panel.
 
-## Example
+## User Registration
+
+Configure a prefix to be added to each username:
+WholeSite > User Registrations
+
+Add these hidden fields to your registration form:
+<pre>
+<input type="hidden" name="wholesite_user_registration" value="1" />
+</pre>
+
+Optionally add this hidden field to use a field or dropdown for a secondary prefix:
+<pre>
+<input type="hidden" name="wholesite_user_registration_secondary_prefix_field" value="insert_field_or_dropdown_name" />
+</pre>
+
+## Transaction Example
 
 <pre>
  //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
@@ -84,6 +101,10 @@
 </pre>
 
 ## Changelog
+
+== 0.0.6 ==
+* Update admin menu verbage.
+* Add user registration processing.
 
 == 0.0.5 ==
 * Added email confirmations for successful transactions.
