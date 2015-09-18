@@ -47,17 +47,32 @@ require_once( WS_PATH . 'classes/transaction.php' );
 require_once( WS_PATH . 'classes/utility.php' );
 require_once( WS_PATH . 'classes/request.php' );
 require_once( WS_PATH . 'classes/response.php' );
+require_once( WS_PATH . 'classes/user.php' );
 
 class WholeSite {
 	
 	function __construct() {
-		// admin hooks
+		// Admin hooks
 		if( is_admin() ) {
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		}
+
+		add_action( 'wp_loaded', array( $this, 'loaded' ) );
 	}
 	
+	/**
+	 * Run stuff after Wordpress has loaded
+	 */
+	function loaded() {
+
+		// If user registration post param has been set, forward form info to WholeSite
+		if( isset( $_POST['wholesite_user_registration'] ) && $_POST['wholesite_user_registration'] ) {
+			$response = $this->registerUser( $_POST );
+
+			// Future: Log responses so we can view stats and errors
+		}
+	}
 	
 	/** PLUGIN SETUP **/
 	
@@ -76,7 +91,10 @@ class WholeSite {
 		add_menu_page( 'WholeSite Dashboard', 'WholeSite', 'activate_plugins', 'wholesite', array( $this, 'render_admin_page' ), 'dashicons-analytics', 30 );
 		
 		// email template config
-		add_submenu_page( 'wholesite', 'Email Confirmation Configuration', 'Email Confirmations', 'activate_plugins', 'wholesite-email', array( $this, 'render_email_template_config_page' ) );  
+		add_submenu_page( 'wholesite', 'Email Confirmation Configuration', 'Transaction Email Confirmations', 'activate_plugins', 'wholesite_email', array( $this, 'render_email_template_config_page' ) );  
+	
+		// user registration config
+		add_submenu_page( 'wholesite', 'User Registration Configuration', 'User Registrations', 'activate_plugins', 'wholesite_registration', array( $this, 'render_user_registration_page' ) );  
 	
 		// add settings page
 		add_submenu_page( 'wholesite', 'WholeSite Settings', 'Settings', 'activate_plugins', 'wholesite-settings', array( $this, 'render_settings_page' ) );  
@@ -89,11 +107,6 @@ class WholeSite {
 		?>
 		<div class="wrap">
 			<h2>WholeSite Dashboard</h2>
-			<br/>
-			Transaction overview coming soon.
-
-
-			
 		</div>
 		<?
 	}
@@ -104,32 +117,28 @@ class WholeSite {
 	function register_settings() {
 		register_setting( 'wholesite_settings', 'wholesite_settings', array( $this, 'sanitize_settings' ) );
 		register_setting( 'wholesite_templates', 'wholesite_templates', array( $this, 'sanitize_settings' ) );
+		register_setting( 'wholesite_registrations', 'wholesite_registrations', array( $this, 'sanitize_settings' ) );
 	
 		add_settings_section( 'wholesite_main', 'Site Settings', array( $this, 'settings_help_site' ), 'wholesite-settings' );
 		add_settings_field( 'site_id', 'Site ID', array( $this, 'render_site_id_setting'), 'wholesite-settings', 'wholesite_main' );
 		add_settings_field( 'license_key', 'License Key', array( $this, 'render_license_key_setting') , 'wholesite-settings', 'wholesite_main' );
 	
 
-		add_settings_section( 'wholesite_email_confirmations', '', '__return_null', 'wholesite-email' );
-		add_settings_field( 'success_confirmation', 'Enable', array( $this, 'render_confirmation_setting'), 'wholesite-email', 'wholesite_email_confirmations' );
+		add_settings_section( 'wholesite_email_confirmations', '', '__return_null', 'wholesite_email' );
+		add_settings_field( 'success_confirmation', 'Enable', array( $this, 'render_confirmation_setting'), 'wholesite_email', 'wholesite_email_confirmations' );
 
 
-		add_settings_section( 'wholesite_email_settings', 'Email Preferences', '__return_null', 'wholesite-email' );
-		add_settings_field( 'email_settings_from_name', 'From Name', array( $this, 'render_email_setting_from_name'), 'wholesite-email', 'wholesite_email_settings' );
-		add_settings_field( 'email_settings_from_email', 'From Email', array( $this, 'render_email_setting_from_email'), 'wholesite-email', 'wholesite_email_settings' );
-		add_settings_field( 'email_settings_subject', 'Subject', array( $this, 'render_email_setting_subject'), 'wholesite-email', 'wholesite_email_settings' );
+		add_settings_section( 'wholesite_email_settings', 'Email Preferences', '__return_null', 'wholesite_email' );
+		add_settings_field( 'email_settings_from_name', 'From Name', array( $this, 'render_email_setting_from_name'), 'wholesite_email', 'wholesite_email_settings' );
+		add_settings_field( 'email_settings_from_email', 'From Email', array( $this, 'render_email_setting_from_email'), 'wholesite_email', 'wholesite_email_settings' );
+		add_settings_field( 'email_settings_subject', 'Subject', array( $this, 'render_email_setting_subject'), 'wholesite_email', 'wholesite_email_settings' );
 
 
-		add_settings_section( 'wholesite_email_templates', 'Template > Confirmation Mapping', array( $this, 'email_template_config_help_site' ), 'wholesite-email' );
+		add_settings_section( 'wholesite_email_templates', 'Template to Confirmation Mapping', array( $this, 'render_email_template_config' ), 'wholesite_email' );
 		
-		$templates = $this->get_available_email_templates();
-
-		foreach ( $templates as $template ) {
-			$file = $template['name'];
-			$hash = $template['hash'];
-
-			add_settings_field( 'tpl-' . $hash . $i, $file, array( $this, 'render_email_template_config_setting' ) , 'wholesite-email', 'wholesite_email_templates', array( 'id' => $hash ) );
-		}
+		add_settings_section( 'wholesite_user_settings', 'Username Prefix', array( $this, 'user_reg_prefix_help' ), 'wholesite_registrations' );
+		add_settings_field( 'user_registration_prefix', 'Prefix', array( $this, 'render_user_registration_prefix_setting'), 'wholesite_registrations', 'wholesite_user_settings' );
+	
 	}
 
 	/**
@@ -158,6 +167,13 @@ class WholeSite {
 						);
 				}
 			}
+
+			if( count( $templates ) == 0 ) {
+				echo 'No email templates found at:<br>"' . $template_path . '".'; 
+			}
+		}
+		else {
+			echo 'No email template directory found at:<br>"' . $template_path . '".';
 		}
 
 		return $templates;
@@ -184,6 +200,13 @@ class WholeSite {
 	}
 	
 	/**
+	 * Render help for user registration prefix
+	 */
+	function user_reg_prefix_help() {
+		echo '<p>Set a prefix to apply to all user registrations.</p>'; 
+	}
+
+	/**
 	 * Render help for site settings
 	 */
 	function settings_help_site() {
@@ -198,12 +221,51 @@ class WholeSite {
 		$val = isset( $options['site_id'] ) ? $options['site_id'] : '';
 		echo '<input id="site_id" type="text" class="regular-text" name="wholesite_settings[site_id]" value="' . esc_attr( $val ) . '"/>';
 	}
+	
+	/**
+	 * Render User Registration Prefix Setting
+	 */
+	function render_user_registration_prefix_setting() {
+		$options = get_option( 'wholesite_registrations' );
+		$val = isset( $options['user_prefix'] ) ? $options['user_prefix'] : '';
+		echo '<input id="user_prefix" type="text" class="regular-text" name="wholesite_registrations[user_prefix]" value="' . esc_attr( $val ) . '"/>';
+	}
 
 	/**
-	 * Render help for email template configuration
+	 * Render section for email template configuration
 	 */
-	function email_template_config_help_site() {
+	function render_email_template_config() {
 		echo '<p>Choose a confirmation for available templates.</p>';
+
+		// render available templates settings input fields
+		$templates = $this->get_available_email_templates();
+
+		foreach ( $templates as $template ) {
+			$file = $template['name'];
+			$hash = $template['hash'];
+
+			add_settings_field( 'tpl-' . $hash . $i, $file, array( $this, 'render_email_template_config_setting' ) , 'wholesite_email', 'wholesite_email_templates', array( 'id' => $hash ) );
+		}
+	}
+
+	/**
+	 * Render user registration page
+	 */
+	function render_user_registration_page() {
+		?>
+		<div class="wrap">
+			<h2>User Registration Configuration</h2>
+			<form action="options.php" method="post">
+				<?php
+				settings_fields( 'wholesite_registrations' );
+				
+				do_settings_sections( 'wholesite_registrations' );
+				
+				submit_button(); 
+				?>
+			</form>
+		</div>
+		<?
 	}
 
 	/**
@@ -212,12 +274,12 @@ class WholeSite {
 	function render_email_template_config_page() {
 		?>
 		<div class="wrap">
-			<h2>Email Confirmation Configuration</h2>
+			<h2>Transaction Email Confirmation Configuration</h2>
 			<form action="options.php" method="post">
 				<?php
 				settings_fields( 'wholesite_templates' );
 				
-				do_settings_sections( 'wholesite-email' );
+				do_settings_sections( 'wholesite_email' );
 				
 				submit_button(); 
 				?>
@@ -246,14 +308,18 @@ class WholeSite {
 		$template_path = get_template_directory() . '/wholesite/email-templates/';
 
 		$keys = array();
+		$settings_path = $template_path . 'settings.php';
 
-		// Try and load settings file
-		if ( file_exists( $template_path . 'settings.php' ) ) {
-			require_once( $template_path . 'settings.php' );
+		// Try and load email template settings file
+		if ( file_exists( $settings_path ) ) {
+			require_once( $settings_path );
 
-			if ( isset( \Wholesite\EmailTemplates\Mapping::$KEY_MAP ) ) {
-				$keys = \Wholesite\EmailTemplates\Mapping::$KEY_MAP;
+			if ( isset( \Wholesite\EmailTemplates\Mapping::$KEY_TO_TEMPLATE_MAP ) ) {
+				$keys = \Wholesite\EmailTemplates\Mapping::$KEY_TO_TEMPLATE_MAP;
 			}
+		}
+		else {
+			echo 'No key mapping file found at:<br>"' . $settings_path . '". <br>See the help folder for an example settings file.<br>';
 		}
 
 		echo '<select id="' . esc_attr( $id ) . '" name="wholesite_templates[templates][' . esc_attr( $id ) . ']"><option value="">-- None --</option>';
@@ -332,6 +398,10 @@ class WholeSite {
 
 		if ( isset( $input['settings'] ) ) {
 			$valid['settings'] = array_map( 'sanitize_text_field', $input['settings'] );
+		}
+
+		if ( isset( $input['user_prefix'] ) ) {
+			$valid['user_prefix'] = str_replace( " ", '_', strtoupper( trim( preg_replace("/[^a-zA-Z0-9_\-\s]+/", '', sanitize_text_field( $input['user_prefix'] ) ) ) ) );
 		}
 
 		return $valid;
@@ -428,7 +498,24 @@ class WholeSite {
 			return $response;
 		}
 		else {
-			return new \WP_Error( 'error', __( 'Please configure WholeSite plugin. Go to \'Settings > WholeSite\'' ) );
+			return new \WP_Error( 'error', __( 'Please configure WholeSite plugin. Go to \'WholeSite > Settings' ) );
+		}
+	}
+
+	/**
+	 * Register a new user
+	 * @param  array  $params
+	 * @return object Response
+	 */
+	public function registerUser( $params = array() ) {
+		if( self::isConfigured() ) {
+			$u = new \WholeSite\User( $params );
+			$response = $u->register();
+
+			return $response;
+		}
+		else {
+			return new \WP_Error( 'error', __( 'Please configure WholeSite plugin. Go to \'WholeSite > Settings\'' ) );
 		}
 	}
 }
