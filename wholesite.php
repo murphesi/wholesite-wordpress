@@ -5,15 +5,15 @@
  * Description: Wordpress plugin to connect your WholeSite account.
  * Author: Mtex Media
  * Author URI: http://www.mtex.ca
- * Version: 0.0.5
+ * Version: 0.0.6
  * Requires at least: 3.9
- * Tested up to: 4.0
+ * Tested up to: 4.2.x
  * Contributors: Chris Murphy
  * Requires: PHP 5 >= 5.3.0
  *  
  * 
  * 
- * Copyright (C) 2014 - Mtex Media Corporation - Chris Murphy
+ * Copyright (C) 2015 - Mtex Media Corporation - Chris Murphy
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace WholeSite;
  
 // define environment variables
 define( 'WS_ENVIRONMENT', 'production' ); // [production|dev]
-define( 'WS_VERSION', '0.0.5' );
+define( 'WS_VERSION', '0.0.6' );
 define( 'WS_URI', plugin_dir_url( __FILE__ ) );
 define( 'WS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WS_ENDPOINT', 'https://api.wholesite.com/1.0' );
