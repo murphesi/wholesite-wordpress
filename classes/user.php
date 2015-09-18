@@ -7,7 +7,7 @@ namespace WholeSite;
  * registered with WholeSite
  *
  *  - wholesite_user_registration => 1
- *  - wholesite_user_registration_secondary_prefix_field => [value or array]
+ *  - [optional] wholesite_user_registration_secondary_prefix_field => [value or array]
  */
 class User {
 	
