@@ -105,6 +105,7 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 ## Changelog
 
 == 0.0.7 ==
+* Add user registration forwarding option. POST registration detail to external url.
 * Change 'wholesite_user_registration_secondary_prefix_field' to more meaningful 'wholesite_user_registration_identifier_field'
 
 == 0.0.6 ==
