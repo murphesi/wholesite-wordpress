@@ -2,7 +2,7 @@
 
  Contributors: Chris Murphy
  Tested up to: 4.2.x
- Stable tag: 0.0.6
+ Stable tag: 0.0.7
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
@@ -22,14 +22,16 @@ Configure a prefix to be added to each username:
 WholeSite > User Registrations
 
 Add these hidden fields to your registration form:
-<pre>
+
+```
 <input type="hidden" name="wholesite_user_registration" value="1" />
-</pre>
+```
 
 Optionally add this hidden field to use a field or dropdown for a secondary prefix:
-<pre>
-<input type="hidden" name="wholesite_user_registration_secondary_prefix_field" value="insert_field_or_dropdown_name" />
-</pre>
+
+```
+<input type="hidden" name="wholesite_user_registration_identifier_field" value="insert_field_or_dropdown_name" />
+```
 
 ## Transaction Example
 
@@ -101,6 +103,10 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 </pre>
 
 ## Changelog
+
+== 0.0.7 ==
+* Add user registration forwarding option. POST registration detail to external url.
+* Change 'wholesite_user_registration_secondary_prefix_field' to more meaningful 'wholesite_user_registration_identifier_field'
 
 == 0.0.6 ==
 * Update admin menu verbage.
