@@ -48,7 +48,7 @@ class Request {
 		$url = rtrim($this->url, '/') . '/';
 		
 		// send request
-		$request = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data ));
+		$request = wp_remote_post( $url . '?s=' . $site . '&l=' . $license, array( 'body' => $this->data, 'timeout' => 30 ));
 		
 		// build response object
 		$response = new \WholeSite\Response();

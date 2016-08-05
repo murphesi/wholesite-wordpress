@@ -2,7 +2,7 @@
 
  Contributors: Chris Murphy
  Tested up to: 4.2.x
- Stable tag: 0.0.6
+ Stable tag: 0.0.7
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
@@ -101,6 +101,9 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 </pre>
 
 ## Changelog
+
+== 0.0.7 ==
+* Increase request timeout to 30 seconds
 
 == 0.0.6 ==
 * Update admin menu verbage.
