@@ -7,7 +7,7 @@
  * Author URI: http://www.mtex.ca
  * Version: 0.0.7
  * Requires at least: 3.9
- * Tested up to: 4.2.x
+ * Tested up to: 4.3.1
  * Contributors: Chris Murphy
  * Requires: PHP 5 >= 5.3.0
  *  
@@ -53,7 +53,7 @@ class WholeSite {
 	
 	function __construct() {
 		// Admin hooks
-		if( is_admin() ) {
+		if ( is_admin() ) {
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		}
@@ -67,10 +67,11 @@ class WholeSite {
 	function loaded() {
 
 		// If user registration post param has been set, forward form info to WholeSite
-		if( isset( $_POST['wholesite_user_registration'] ) && $_POST['wholesite_user_registration'] ) {
+		if ( isset( $_POST['wholesite_user_registration'] ) && $_POST['wholesite_user_registration'] ) {
 			$response = $this->registerUser( $_POST );
-
+			
 			// Future: Log responses so we can view stats and errors
+			// print_r($response);
 		}
 	}
 	
@@ -94,8 +95,9 @@ class WholeSite {
 		add_submenu_page( 'wholesite', 'Email Confirmation Configuration', 'Transaction Email Confirmations', 'activate_plugins', 'wholesite_email', array( $this, 'render_email_template_config_page' ) );  
 	
 		// user registration config
-		add_submenu_page( 'wholesite', 'User Registration Configuration', 'User Registrations', 'activate_plugins', 'wholesite_registration', array( $this, 'render_user_registration_page' ) );  
-	
+		$user_edit_page = add_submenu_page( 'wholesite', 'User Registration Configuration', 'User Registrations', 'activate_plugins', 'wholesite_registration', array( $this, 'render_user_registration_page' ) );  
+		add_action( 'admin_head-' . $user_edit_page, array( $this, 'render_user_registration_page_head' ) );
+
 		// add settings page
 		add_submenu_page( 'wholesite', 'WholeSite Settings', 'Settings', 'activate_plugins', 'wholesite-settings', array( $this, 'render_settings_page' ) );  
 	}
@@ -118,6 +120,7 @@ class WholeSite {
 		register_setting( 'wholesite_settings', 'wholesite_settings', array( $this, 'sanitize_settings' ) );
 		register_setting( 'wholesite_templates', 'wholesite_templates', array( $this, 'sanitize_settings' ) );
 		register_setting( 'wholesite_registrations', 'wholesite_registrations', array( $this, 'sanitize_settings' ) );
+		register_setting( 'wholesite_registration_forwarding', 'wholesite_registration_forwarding', array( $this, 'sanitize_registration_forwarding_options' ) );
 	
 		add_settings_section( 'wholesite_main', 'Site Settings', array( $this, 'settings_help_site' ), 'wholesite-settings' );
 		add_settings_field( 'site_id', 'Site ID', array( $this, 'render_site_id_setting'), 'wholesite-settings', 'wholesite_main' );
@@ -139,6 +142,9 @@ class WholeSite {
 		add_settings_section( 'wholesite_user_settings', 'Username Prefix', array( $this, 'user_reg_prefix_help' ), 'wholesite_registrations' );
 		add_settings_field( 'user_registration_prefix', 'Prefix', array( $this, 'render_user_registration_prefix_setting'), 'wholesite_registrations', 'wholesite_user_settings' );
 	
+		add_settings_section( 'wholesite_registration_forwarding_settings', '', array( $this, 'user_reg_new_forward_help' ), 'wholesite_registration_forwarding' );
+		add_settings_field( 'user_registration_forward_key', 'Key', array( $this, 'render_registration_forward_key_setting'), 'wholesite_registration_forwarding', 'wholesite_registration_forwarding_settings' );
+		add_settings_field( 'user_registration_forward_url', 'URL', array( $this, 'render_registration_forward_url_setting'), 'wholesite_registration_forwarding', 'wholesite_registration_forwarding_settings' );
 	}
 
 	/**
@@ -151,13 +157,13 @@ class WholeSite {
 
 		$template_path = get_template_directory() . '/wholesite/email-templates/';
 
-		if( is_dir( $template_path ) ) {
+		if ( is_dir( $template_path ) ) {
 			$files = scandir( $template_path );
 
-			for( $i = 0; $i < count( $files ); $i++ ) {
+			for ( $i = 0; $i < count( $files ); $i++ ) {
 				$file = $files[$i];
 
-				if( stristr( $file, '.html' ) ) {
+				if ( stristr( $file, '.html' ) ) {
 					$hash = md5( $file );
 
 					$templates[$hash] = array( 
@@ -168,7 +174,7 @@ class WholeSite {
 				}
 			}
 
-			if( count( $templates ) == 0 ) {
+			if ( count( $templates ) == 0 ) {
 				echo 'No email templates found at:<br>"' . $template_path . '".'; 
 			}
 		}
@@ -197,6 +203,13 @@ class WholeSite {
 			</form>
 		</div>
 		<?
+	}
+	
+	/**
+	 * Render help for user registration forwarding
+	 */
+	function user_reg_new_forward_help() {
+		echo '<p>Map a specific key from the field name specified in \'wholesite_user_registration_identifier_field\' to be forwarded to an external url.</p>'; 
 	}
 	
 	/**
@@ -230,6 +243,20 @@ class WholeSite {
 		$val = isset( $options['user_prefix'] ) ? $options['user_prefix'] : '';
 		echo '<input id="user_prefix" type="text" class="regular-text" name="wholesite_registrations[user_prefix]" value="' . esc_attr( $val ) . '"/>';
 	}
+	
+	/**
+	 * Render User Registration Forward Key Setting
+	 */
+	function render_registration_forward_key_setting() {
+		echo '<input id="forward_key" type="text" class="regular-text" name="wholesite_registration_forwarding[forward][key]" value=""/>';
+	}
+	
+	/**
+	 * Render User Registration Forward URL Setting
+	 */
+	function render_registration_forward_url_setting() {
+		echo '<input id="forward_url" type="text" class="regular-text" name="wholesite_registration_forwarding[forward][url]" value=""/>';
+	}
 
 	/**
 	 * Render section for email template configuration
@@ -249,23 +276,67 @@ class WholeSite {
 	}
 
 	/**
-	 * Render user registration page
+	 * User registration page head action
+	 */
+	function render_user_registration_page_head() {
+		if ( isset( $_POST['wholesite-form-edit-action'] ) || ( ! isset( $_GET['fid'] ) ) ) {
+			require_once('classes/registration-forwarding-list-table.php');
+		}
+	}
+
+	/**
+	 * Render user registration settings page
 	 */
 	function render_user_registration_page() {
+		$message = '';
+
+		if ( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] == true ) {
+			wp_redirect( '/wp-admin/admin.php?page=wholesite_registration&forward_added=true' );
+		}
+
+		if ( isset( $_GET['forward_added'] ) ) {
+			$message = 'Forward successfully created.';
+		}
+
 		?>
 		<div class="wrap">
-			<h2>User Registration Configuration</h2>
-			<form action="options.php" method="post">
+			<?php if ( $message !== '' ) { ?>
+				<div class="update-nag"><?php echo esc_html( $message ); ?></div>
+			<?php } ?> 
+
+			<?php if ( isset( $_GET['new'] ) ) { ?>
+				<h2>New Registration Forward <a class="add-new-h2" href="<?php echo get_admin_url(); ?>admin.php?page=wholesite_registration">View All</a></h2>
+				<form action="options.php" method="post">
+					<?php
+					settings_fields( 'wholesite_registration_forwarding' );
+					
+					do_settings_sections( 'wholesite_registration_forwarding' );
+					
+					submit_button('Create New Forward'); 
+					?>
+				</form>
+			<?php } else { ?>
+				<h2>User Registration Configuration</h2>
+				<form action="options.php" method="post">
+					<?php
+					settings_fields( 'wholesite_registrations' );
+					
+					do_settings_sections( 'wholesite_registrations' );
+					
+					submit_button(); 
+					?>
+				</form>
+				
+				<h2>Registration Forwarding
+		  			<a class="add-new-h2" href="<?php echo get_admin_url(); ?>admin.php?page=wholesite_registration&new">Add New</a>
+				</h2>
+				<div >Map a specific key from the field name specified in 'wholesite_user_registration_identifier_field' to be forwarded to an external url.</div>
 				<?php
-				settings_fields( 'wholesite_registrations' );
-				
-				do_settings_sections( 'wholesite_registrations' );
-				
-				submit_button(); 
+				wholesite_registration_forwarding_list_page_table();
 				?>
-			</form>
+			<?php } ?>
 		</div>
-		<?
+		<?php
 	}
 
 	/**
@@ -388,6 +459,7 @@ class WholeSite {
 			$valid['license_key'] = sanitize_text_field( $input['license_key'] );
 		}
 
+		// Email confirmation settings
 		if ( isset( $input['templates'] ) ) {
 			$valid['templates'] = array_map( 'sanitize_text_field', $input['templates'] );
 		}
@@ -400,11 +472,46 @@ class WholeSite {
 			$valid['settings'] = array_map( 'sanitize_text_field', $input['settings'] );
 		}
 
+		// User registration settings
 		if ( isset( $input['user_prefix'] ) ) {
-			$valid['user_prefix'] = str_replace( " ", '_', strtoupper( trim( preg_replace("/[^a-zA-Z0-9_\-\s]+/", '', sanitize_text_field( $input['user_prefix'] ) ) ) ) );
+			$valid['user_prefix'] = str_replace( " ", '_', strtolower( trim( preg_replace("/[^a-zA-Z0-9_\-\s]+/", '', sanitize_text_field( $input['user_prefix'] ) ) ) ) );
 		}
 
 		return $valid;
+	}
+
+	/**
+	 * Sanitize and process the creation of new registration forwards
+	 * @param  array $input
+	 * @return array
+	 */
+	function sanitize_registration_forwarding_options( $input ) {
+		$options = get_option( 'wholesite_registration_forwarding', array() );
+
+		// re-index array
+		$options['forwards'] = array_values( $options['forwards'] );
+
+		if ( isset( $input['forward'] ) ) {
+			$next_index = 1;
+
+			foreach ( $options['forwards'] as $f ) {
+				if ( $f['id'] >= $next_index ) {
+					$next_index = $f['id'] + 1;
+				}
+			}
+
+			$forward = array();
+			$forward['id'] = $next_index;
+			$forward['key'] = str_replace( " ", '_', strtolower( trim( preg_replace("/[^a-zA-Z0-9_\-\s]+/", '', $input['forward']['key'] ) ) ) );
+			$forward['url'] = $input['forward']['url'];
+
+			$options['forwards'][$next_index] = array_map( 'sanitize_text_field', $forward );;
+		} 
+		else if ( isset( $input['forwards'] ) && ( isset( $_GET['fid_del'] ) || ( isset( $_GET['action'] ) &&  $_GET['action'] == 'delete' ) ) ) {
+			$options = $input;
+		}
+
+		return $options;
 	}
 	
 	/**
@@ -460,7 +567,7 @@ class WholeSite {
 					wp_mail( $params['billEmail'], $settingsConfig['subject'], $confirmationTemplate, $headers );
 
 					// Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
-					remove_filter( 'wp_mail_content_type', 'set_html_content_type' );
+					remove_filter( 'wp_mail_content_type', array( $this, 'set_html_content_type' ) );
 
 					return true;
 				}
@@ -483,12 +590,12 @@ class WholeSite {
 	 * @return object Response from transaction
 	 */
 	public function processTransaction( $params = array() ) {
-		if( self::isConfigured() ) {
+		if ( self::isConfigured() ) {
 			$t = new \WholeSite\Transaction( $params );
 			$response = $t->process();
 
 			// If key provided send confirmation email if configured
-			if( isset( $params['confirmationKey'] ) && $response->success == 1 ) {
+			if ( isset( $params['confirmationKey'] ) && $response->success == 1 ) {
 				$confirmationConfig = \WholeSite\Utility::getSetting( 'confirmations', 'wholesite_templates' );
 				if ( isset( $confirmationConfig['success-send'] ) && $confirmationConfig['success-send'] ) {
 					$this->sendConfirmationEmail( $params['confirmationKey'], $params );
@@ -505,14 +612,32 @@ class WholeSite {
 	/**
 	 * Register a new user
 	 * @param  array  $params
-	 * @return object Response
+	 * @return mixed A Response object or an array of Response objects
 	 */
 	public function registerUser( $params = array() ) {
-		if( self::isConfigured() ) {
+		if ( self::isConfigured() ) {
 			$u = new \WholeSite\User( $params );
-			$response = $u->register();
 
-			return $response;
+			// if identifier field is provided we need to register user for each item in this array
+			if ( isset( $params['wholesite_user_registration_identifier_field'] ) && isset( $params[ $params['wholesite_user_registration_identifier_field'] ] ) ) {
+				$id_field = $params[ $params['wholesite_user_registration_identifier_field'] ];
+
+				if ( is_array( $id_field ) ) {
+					$response = array();
+
+					foreach ( $id_field as $id ) {
+						$u->registrationIdentifier = $id;
+						$response[] = $u->register();
+					}
+
+					return $response;
+				}
+				else {
+					$u->registrationIdentifier = $id_field;
+				}
+			}
+			
+			return $u->register();
 		}
 		else {
 			return new \WP_Error( 'error', __( 'Please configure WholeSite plugin. Go to \'WholeSite > Settings\'' ) );
