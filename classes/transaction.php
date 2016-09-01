@@ -196,6 +196,18 @@ class Transaction {
 	 */
 	public $test = false;
 	
+	/**
+	 * Type of payment method
+	 * e.g. 'debit' or 'credit'
+	 */
+	public $paymentType = 'credit';
+	
+	/**
+	 * Interac fund confirmation id (IDEBIT_TRACK2)
+	 * Required for debit transactions
+	 */
+	public $track2;
+	
 	
 	
 	public function __construct( $params = array() ) {
@@ -235,6 +247,8 @@ class Transaction {
 		if( isset($params['billEmail']) ) $this->billEmail = sanitize_email( $params['billEmail'] );
 		if( isset($params['customData']) ) $this->customData = $params['customData'];
 		if( isset($params['test']) ) $this->test = ($params['test']);
+		if( isset($params['paymentType']) ) $this->paymentType = sanitize_text_field( $params['paymentType'] );
+		if( isset($params['track2']) ) $this->track2 = sanitize_text_field( $params['track2'] );
 	}
 	
 	/**
@@ -282,7 +296,9 @@ class Transaction {
 				'billPhone' => $this->billPhone,
 				'billPhoneExt' => $this->billPhoneExt,
 				'billEmail' => $this->billEmail,
-				'customData' => base64_encode( serialize( $this->customData ) )
+				'customData' => base64_encode( serialize( $this->customData ) ),
+				'paymentType' => $this->paymentType,
+				'track2' => $this->track2
 			);
 		
 		// request URL

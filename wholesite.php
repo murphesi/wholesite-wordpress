@@ -5,9 +5,9 @@
  * Description: Wordpress plugin to connect your WholeSite account.
  * Author: Mtex Media
  * Author URI: http://www.mtex.ca
- * Version: 0.0.7
+ * Version: 0.0.8
  * Requires at least: 3.9
- * Tested up to: 4.3.1
+ * Tested up to: 4.6
  * Contributors: Chris Murphy
  * Requires: PHP 5 >= 5.3.0
  *  
@@ -37,7 +37,7 @@ namespace WholeSite;
  
 // define environment variables
 define( 'WS_ENVIRONMENT', 'production' ); // [production|dev]
-define( 'WS_VERSION', '0.0.7' );
+define( 'WS_VERSION', '0.0.8' );
 define( 'WS_URI', plugin_dir_url( __FILE__ ) );
 define( 'WS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WS_ENDPOINT', 'https://api.wholesite.com/1.0' );

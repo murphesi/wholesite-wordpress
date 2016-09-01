@@ -1,8 +1,8 @@
 # WholeSite - Wordpress Plugin
 
  Contributors: Chris Murphy
- Tested up to: 4.2.x
- Stable tag: 0.0.7
+ Tested up to: Wordpress 4.6
+ Stable tag: 0.0.8
  License: GPLv3
  License URI: http://www.gnu.org/licenses
 
@@ -33,7 +33,7 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 <input type="hidden" name="wholesite_user_registration_identifier_field" value="insert_field_or_dropdown_name" />
 ```
 
-## Transaction Example
+## Credit Transaction Example
 
 <pre>
  //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
@@ -48,6 +48,8 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 		'orderId' 			=> 'ACMECO' . date( 'dmyGis' ),
 		'customerId' 		=> 'John Doe',
 		
+		'paymentType'		=> 'credit',
+
 		'cardType' 			=> 'VISA',
 		'cardholder' 		=> 'John Doe', // required
 		'pan' 				=> str_replace(array("\s", "-", " "), "", trim( '4242424242424242' )), // required
@@ -87,6 +89,75 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 	);
 	
  // Process transaction
+ $wholesite = new \WholeSite\WholeSite();
+ $response = $wholesite->processTransaction( $transactionData );
+
+ // Check for errors
+ if( is_wp_error( $response ) ) {
+	echo $response->get_error_message();
+ }
+ else {	
+	print_r( $response );
+	
+	// show your messaging based on response
+ }
+
+ //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
+</pre>
+
+## Debit Transaction Example
+
+<pre>
+ //~~~~~~~~~~~~~~ TRANSACTION SAMPLE ~~~~~~~~~~~~~~//
+
+ // Build transaction data
+ $transactionData = array(
+		//~~~~~TEST MODE~~~~~~~~~~~~~
+		'test'				=> true,
+		//~~~~~TEST MODE~~~~~~~~~~~~~
+		
+		'cart' 				=> 'ffffffff-ffff-ffff-ffff-ffffffffffff', // required
+		'orderId' 			=> 'ACMECO' . date( 'dmyGis' ),
+		'customerId' 		=> 'John Doe',
+		
+		'paymentType'		=> 'debit',
+
+		'track2' 			=> '3728024906540591206=0609AAAAAAAAAAAAA', // required
+		
+		'amount'			=> number_format(0.04, 2, '.', ''), // required
+		'taxes'				=> array(
+									array( "percent" => 13, "description" => "HST" )	
+								),
+		'designation'		=> 'Auction',
+		'anonymous'			=> false,
+		'inhonName'			=> 'Honour Name',
+		'inmemName'			=> 'Memory Name',
+		'howDidYouHear'		=> 'flyer',
+		'comment'			=> 'no comment',
+		'taxReceipt'		=> 'immediate',
+		'source'			=> 'front page banner',
+		'recurrence'		=> 'none',
+		
+		'billFirstName'		=> 'John',
+		'billLastName'		=> 'Doe',
+		'billCompanyName'	=> 'DM Paper Co.',
+		'billAddress1'		=> '124 Paper Rd.',
+		'billApt'			=> '101',
+		'billCity'			=> 'Somewhere City',
+		'billProvState'		=> 'Somewhere Province',
+		'billCountry'		=> 'CA',
+		'billCode'			=> 'L2A 4P5',
+		'billPhone'			=> '1-555-555-5555',
+		'billPhoneExt'		=> '123',
+		'billEmail'			=> 'test@example.com',
+		
+		'customData'		=> array(
+									"promoCode" => "DISCOUNT99"	
+								)
+	);
+	
+ // Process transaction
+ $wholesite = new \WholeSite\WholeSite();
  $response = $wholesite->processTransaction( $transactionData );
 
  // Check for errors
@@ -103,6 +174,9 @@ Optionally add this hidden field to use a field or dropdown for a secondary pref
 </pre>
 
 ## Changelog
+
+== 0.0.8 ==
+* Add debit acceptance.
 
 == 0.0.7 ==
 * Increase request timeout to 30 seconds
